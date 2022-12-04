@@ -61,3 +61,21 @@ void ReportException(v8::Isolate *isolate, v8::TryCatch *try_catch)
         }
     }
 }
+
+v8::Local<v8::Value> compileRun(
+        v8::Isolate *isolate,
+        v8::Local<v8::Context> context,
+        v8::Local<v8::String> source
+)
+{
+    // Compile the source code.
+    v8::Local<v8::Script> script =
+            v8::Script::Compile(context, source).ToLocalChecked();
+    // Run the script to get the result.
+    v8::Local<v8::Value> result = script->Run(context).ToLocalChecked();
+    // Convert the result to an UTF8 string and print it.
+    v8::String::Utf8Value utf8(isolate, result);
+    printf("%s\n", *utf8);
+
+    return result;
+}

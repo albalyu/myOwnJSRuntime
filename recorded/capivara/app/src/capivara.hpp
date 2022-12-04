@@ -27,28 +27,46 @@ private:
         // Enter the context for compiling and running the hello world script.
         v8::Context::Scope context_scope(this->context);
         {
-            // Read file from args
-            v8::Local<v8::String> source;
-            if (!Fs::ReadFile(isolate, filename).ToLocal(&source))
+            // Compile js code from file
             {
-                fprintf(stderr, "Error reading file\n");
-                return;
+                // Read file from args
+                v8::Local <v8::String> source;
+                if (!Fs::ReadFile(isolate, filename).ToLocal(&source)) {
+                    fprintf(stderr, "Error reading file\n");
+                    return;
+                }
+
+                // Create a string containing the JavaScript source code.
+                v8::ScriptOrigin origin(isolate, v8_str(filename));
+
+                // Compile the source code.
+                v8::Local <v8::Script> script =
+                        v8::Script::Compile(this->context, source, &origin).ToLocalChecked();
+
+                // Run the script to get the result.
+                v8::Local <v8::Value> result = script->Run(this->context).ToLocalChecked();
             }
 
-            // Create a string containing the JavaScript source code.
-            v8::ScriptOrigin origin(isolate, v8_str(filename));
+            // Compile second js block
+            {
+                // Create a string containing the JavaScript source code.
+                v8::Local<v8::String> source =
+                        v8::String::NewFromUtf8Literal(isolate, "print(Db); print(sleep); const str = 'Hello' + ', World!';");
 
-            // Compile the source code.
-            v8::Local<v8::Script> script =
-                v8::Script::Compile(this->context, source, &origin).ToLocalChecked();
+                // Compile the source code and Run the script.
+                v8::Local <v8::Value> result = compileRun(isolate, context, source);
+            }
 
-            // Run the script to get the result.
-            v8::Local<v8::Value> result = script->Run(this->context).ToLocalChecked();
+            // Compile third js block
+            {
+                // Create a string containing the JavaScript source code.
+                v8::Local<v8::String> source =
+                        v8::String::NewFromUtf8Literal(isolate, "print(str)");
 
-            // Convert the result to an UTF8 string and print it.
-            v8::String::Utf8Value utf8(this->isolate, result);
+                // Compile the source code and Run the script.
+                v8::Local <v8::Value> result = compileRun(isolate, context, source);
+            }
 
-            // fprintf(stderr, "result %s\n", *utf8);
             WaitForEvents();
         }
     }
