@@ -1,6 +1,9 @@
+#include <string>
 #include <libplatform/libplatform.h>
 #include <uv.h>
 #include "v8.h"
+
+using namespace std;
 
 #include "./fs.hpp"
 #include "./util.hpp"
@@ -59,9 +62,12 @@ private:
 
             // Compile third js block
             {
+                // Source code
+                string code = "print(str)";
+
                 // Create a string containing the JavaScript source code.
                 v8::Local<v8::String> source =
-                        v8::String::NewFromUtf8Literal(isolate, "print(str)");
+                        v8::String::NewFromUtf8(isolate, code.c_str()).ToLocalChecked();
 
                 // Compile the source code and Run the script.
                 v8::Local <v8::Value> result = compileRun(isolate, context, source);
