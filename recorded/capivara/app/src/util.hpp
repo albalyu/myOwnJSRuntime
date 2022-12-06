@@ -69,8 +69,7 @@ v8::Local<v8::Value> compileJS(
 )
 {
     // Create a string containing the JavaScript source code.
-    v8::Local<v8::String> source =
-            v8::String::NewFromUtf8(isolate, code.c_str()).ToLocalChecked();
+    v8::Local<v8::String> source = v8_str(code.c_str());
     // Compile the source code.
     v8::Local<v8::Script> script =
             v8::Script::Compile(context, source).ToLocalChecked();
